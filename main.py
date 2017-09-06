@@ -12,6 +12,21 @@ import re
 
 # List Parser #
 
+def lisp_format(x):
+
+    if type(x) is list:
+
+        result = str(x)
+        result = result.replace("'", '')
+        result = result.replace('"', '')
+        result = result.replace(',', '')
+        result = result.replace('[', '(')
+        result = result.replace(']', ')')
+
+        return result
+
+    return result
+
 def is_list(e):
 
     return e.startswith('(') and e.endswith(')')
@@ -147,6 +162,22 @@ def eq(*args):
 
     return all(map(lambda x: x == args[0], args))
 
+def quote(*args):
+
+    if len(args) != 1:
+
+        msg = "'quote' takes 1 argument, {} given"
+    
+        raise RuntimeError(msg.format(len(args)))
+
+    arg = args[0]
+
+    if type(arg) is list:
+
+        return "'" + lisp_format(args[0])
+
+    return "'" + arg
+
 # symbol table structure
 
 sym_table = {
@@ -155,6 +186,11 @@ sym_table = {
     '*' : mul,
     '/' : div,
     'eq?' : eq,
+    'quote' : quote,
+    }
+
+special_sym = {
+    'quote',
     }
 
 def get_value(sym):
@@ -185,6 +221,10 @@ def evaluate(expr):
 
     sym = expr[0]
     val = get_value(sym)
+
+    if sym in special_sym:
+
+        return val(*expr[1:])
     
     args = []
 
