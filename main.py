@@ -27,15 +27,19 @@ def to_list(s):
 
         i, e = next_elem(s, i)
 
-        print(e) # dummy code
-
         if is_list(e):
 
             result.append(to_list(e))
 
         elif e != '':
 
-            result.append(e)
+            if re.match(r'-?\d+', e):
+
+                result.append(int(e))
+
+            else:
+
+                result.append(e)
 
     return result
 
@@ -97,6 +101,57 @@ def next_list(s, start):
 
 # Symbol Table #
 
+# built-in operations
+
+def add(*args):
+
+    total = 0
+
+    for num in args:
+
+        total += num
+
+    return total
+
+def sub(*args):
+
+    total = args[0] if len(args) > 0 else 0
+
+    for i in range(1, len(args)):
+
+        total -= args[i]
+
+    return total
+
+def mul(*args):
+
+    total = 1
+
+    for num in args:
+
+        total *= num
+
+    return total
+
+def div(*args):
+
+    total = args[0] if len(args) > 0 else 0
+
+    for i in range(1, len(args)):
+
+        total //= args[i]
+
+    return total
+
+# symbol table structure
+
+sym_table = {
+    '+' : add,
+    '-' : sub,
+    '*' : mul,
+    '/' : div,
+    }
+
 def get_value(sym):
     '''
     Given a symbol in Lisp (+, square, -, etc.),
@@ -104,4 +159,56 @@ def get_value(sym):
     value that is currently bound to this symbol
     '''
 
-    pass
+    if sym in sym_table:
+
+        return sym_table[sym]
+
+    raise RuntimeError("Symbol '{}' is undefined".format(sym))
+
+# Evaluation #
+
+def evaluate(expr):
+    '''
+    Given a Lisp expression, represented as
+    a nested list of strings in Python, this
+    function evaluates it and returns the final
+    value
+
+    NOTE: this function currently only supports
+          Lisp normal form expressions
+    '''
+
+    sym = expr[0]
+    val = get_value(sym)
+    
+    args = []
+
+    for i in range(1, len(expr)):
+
+        curr_arg = expr[i]
+
+        if type(curr_arg) is list:
+
+            args.append(evaluate(curr_arg))
+
+        else:
+
+            args.append(curr_arg)
+
+    return val(*args)
+
+
+# Testing Code #
+if __name__ == '__main__':
+
+    e = input('lisper > ')
+
+    while e != 'quit':
+
+        list_expr = to_list(e)
+        
+        result = evaluate(list_expr)
+        
+        print('==> {}'.format(result))
+
+        e = input('lisper > ')
