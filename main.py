@@ -143,6 +143,10 @@ def div(*args):
 
     return total
 
+def eq(*args):
+
+    return all(map(lambda x: x == args[0], args))
+
 # symbol table structure
 
 sym_table = {
@@ -150,6 +154,7 @@ sym_table = {
     '-' : sub,
     '*' : mul,
     '/' : div,
+    'eq?' : eq,
     }
 
 def get_value(sym):
