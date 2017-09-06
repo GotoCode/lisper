@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Lisp Interpreter</title>
+    <meta name="description" content="Programming practice projects designed to take your Python coding chops to the next level">
+    <meta name="author" content="Louie Dinh">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="http://pythonpracticeprojects.com/theme/html5.js"></script>
+    <![endif]-->
+
+    <!-- start Mixpanel -->
+    <script type="text/javascript">
+        (function(e,b){if(!b.__SV){var a,f,i,g;window.mixpanel=b;b._i=[];b.init=function(a,e,d){function f(b,h){var a=h.split(".");2==a.length&&(b=b[a[0]],h=a[1]);b[h]=function(){b.push([h].concat(Array.prototype.slice.call(arguments,0)))}}var c=b;"undefined"!==typeof d?c=b[d]=[]:d="mixpanel";c.people=c.people||[];c.toString=function(b){var a="mixpanel";"mixpanel"!==d&&(a+="."+d);b||(a+=" (stub)");return a};c.people.toString=function(){return c.toString(1)+".people (stub)"};i="disable track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config people.set people.set_once people.increment people.append people.track_charge people.clear_charges people.delete_user".split(" ");
+        for(g=0;g<i.length;g++)f(c,i[g]);b._i.push([a,e,d])};b.__SV=1.2;a=e.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"===e.location.protocol?"https:":"http:")+'//cdn.mxpnl.com/libs/mixpanel-2.2.min.js';f=e.getElementsByTagName("script")[0];f.parentNode.insertBefore(a,f)}})(document,window.mixpanel||[]);
+        mixpanel.init("f648b3a9798e7c489b48fb616f33abfe");
+
+        mixpanel.track("Page Visit!");
+    </script>
+    <!-- end Mixpanel -->
+
+    <!-- Start SumoMe -->
+    <script src="//load.sumome.com/" data-sumo-site-id="3985b6f2e1d26b66de9bd40994b14446ac22d852d057002541f559342aecd669" async></script>
+    <!-- End SumoMe -->
+
+    <!-- Le styles -->
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap.no-icons.min.css" rel="stylesheet">
+    <link href="http://pythonpracticeprojects.com/theme/local.css" rel="stylesheet">
+    <link href="http://pythonpracticeprojects.com/theme/pygments.css" rel="stylesheet">
+    <link href="http://pythonpracticeprojects.com/theme/font-awesome.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Gudea:400,400italic|Alegreya+SC' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+<header class="blog-header">
+  <div class="container">
+    <div class="row-fluid">
+      <div class="span8">
+	<a href="http://pythonpracticeprojects.com" class="brand">Python Practice Projects</a>
+      </div>
+
+      <div class="span4" id="blog-nav">
+	<ul class="nav nav-pills pull-right">
+
+        <li><a href="http://discourse.pythonpracticeprojects.com">Discussion</a></li>
+       <li><a href="https://gumroad.com/l/cSIzC">Buy eBook</a></li>
+       <li><a href="http://pythonpracticeprojects.com">Projects</a></li>
+	    <li >
+	      <a href="http://pythonpracticeprojects.com/category/blog.html ">Blog</a>
+        </li>
+	</ul>
+      </div>
+    </div> <!-- End of fluid row-->
+  </div>   <!-- End of Container-->
+</header>
+    
+<div class="container">
+    <div class="content">
+    <div class="row-fluid">
+
+        <div class="span10">
+<section id="content" class="body span10 page">
+    <h1>Lisp Interpreter</h1>
+<h2>Motivation</h2>
+<p>Any serious attempt at studying the art of computer programming must include a component on programming languages. Code is 
+a programmer's raw material, like paint to an artist or words to a writer. Starting out, we all tend to see a programming language
+as a set of directives that can be used to manipulate data. Code lives in one world and data another.  This is a limit that holds you
+back from really jumping down the computation rabbit hole. The best way, that I've found, to really understand the idea 
+"code is data" is to implement your own interpreter.</p>
+<p>This project is focused on producing a Lisp interpreter, more specifically a Scheme interpreter. You may be wondering, why are we writing 
+an interpreter for an outdated AI language? Lisp is a good project because the syntax is exceedingly simple. There is one main
+syntax construct and a few special cases that make up the entire language. This simplicity clears away a slew of problems and 
+exposes the main insight of code/data equivalence.</p>
+<p>Also, Lisp is worth learning because it makes you a better programmer. That's not only my opinion. Great hackers of the past
+have agreed with the sentiment.</p>
+<blockquote>
+<p>Lisp is worth learning for the profound enlightenment experience you will have when you finally get it;
+that experience will make you a better programmer for the rest of your days,
+even if you never actually use Lisp itself a lot.
+-Eric Raymond</p>
+</blockquote>
+<h2>Prerequisites</h2>
+<p><strong>Recursion</strong>: Before dealing with Lisp, you should have a firm grasp of recursion. The best resource I've found for exploring
+            recursion is the book The Little Schemer.</p>
+<p><strong>Basic Lisp</strong>: It is helpful if you've downloaded a Lisp interpreter like Dr Racket and typed in a few commands. You don't need
+             extensive knowledge, but an hour noodling around with the interpreter would be beneficial. Once again, I recommend
+             The Little Schemer if you want a thorough introduction.</p>
+<h2>Problem Statement</h2>
+<p>In his landmark paper, 
+<a href="http://www-formal.stanford.edu/jmc/recursive.html">Recursive Functions Of Symbolic Expressions And Their Computation By Machine</a>, 
+John McCarthy builds a programming language on a handful of primitive expressions. He called the language LISP for List Processing.</p>
+<p>In this problem, Lisp will always refer to McCarthy's original Lisp.</p>
+<p>For this project, your job is to write a Lisp Interpreter. The interpreter will take in a
+text file containing a Lisp program, execute it, and then display the result.</p>
+<p>Here is a simple Lisp program:</p>
+<div class="highlight"><pre><span class="p">(</span><span class="o">+</span> <span class="mi">2</span> <span class="mi">2</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">3</span>    <span class="err">#</span> <span class="o">=&gt;</span> <span class="n">stands</span> <span class="k">for</span> <span class="s">&quot;evalutes to&quot;</span>
+</pre></div>
+
+
+<p>Lisp is a functional language. Every Lisp expression evalutes to value. A Lisp expression
+is either an atom or a list. Atoms are strings of characters, basically anything except a parentheses.
+A list is a number of expressions enclosed within parentheses. Notice how I didn't say a list of atoms.</p>
+<p>Examples of atoms: </p>
+<div class="highlight"><pre><span class="mi">1</span>
+<span class="o">+</span>
+<span class="n">john</span>
+<span class="n">burger</span>
+</pre></div>
+
+
+<p>Let's take a look at these atom examples. 1 is just a number, similar to an int in C or Python.
+ However, +, john and burger are a bit unusual. In Lisp, these are called symbols. You may find
+ it tempting to draw an analogy of strings to symbols. Don't. They are completely different beasts. </p>
+<p>The concept of a symbol is implicit in other languages, Lisp just exposes the concept explicitly.
+ In other languages, symbols are used as variable names. To execute your programs, a compiler/interpreter
+ will tokenize your source code and then identify these symbols. In Lisp, symbols are also used to
+ as identifiers for variables, however you get to muck with them directly. Symbols are just entities
+ that you can bind values to.</p>
+<p>Now let's talk about lists. A list is just the symbol '(', followed by a series of elements
+separated by spaces, and then a closing ')'.</p>
+<p>Example of lists:</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">a</span> <span class="n">b</span> <span class="n">c</span><span class="p">)</span>
+<span class="p">(</span><span class="n">john</span> <span class="n">jack</span> <span class="n">jim</span><span class="p">)</span>
+<span class="p">((</span><span class="n">a</span> <span class="n">b</span> <span class="n">c</span><span class="p">)</span> <span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="n">d</span> <span class="n">e</span> <span class="n">f</span><span class="p">))</span>     <span class="err">#</span> <span class="n">This</span> <span class="n">list</span> <span class="n">as</span> <span class="mi">3</span> <span class="n">elements</span><span class="p">.</span> <span class="n">Each</span> <span class="n">element</span> <span class="n">is</span> <span class="n">also</span> <span class="n">a</span> <span class="n">list</span><span class="p">.</span>
+<span class="p">(</span><span class="o">+</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span>                       <span class="err">#</span> <span class="n">Yes</span><span class="p">,</span> <span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">list</span> <span class="n">too</span><span class="p">.</span>
+</pre></div>
+
+
+<h3>Normal Forms</h3>
+<p>For the sake of simplicity, let's build a Lisp that only has 4 normal builtin functions:</p>
+<div class="highlight"><pre>+
+-
+*
+/
+</pre></div>
+
+
+<p>They do exactly what you think they do: Add, subtract, multiply and divide.</p>
+<p>The rules for evaluating a normal lisp expression or form is easy. Take first element in
+a list, look up it's value and apply it to the other elements in the list. For example:</p>
+<p>(+ 1 2) =&gt; 3</p>
+<p>Remember our discussion about symbols earlier? + is just a symbol which is by default bound
+to the function we know as addition. So when we enter the form (+ 1 2) into the interpreter,
+Lisp looks up the function associated with +, which is addition, and then applies it to the
+arguments 1 and 2. </p>
+<p>If the arguments are also lists, rather than atoms, then evaluate the arguments first
+before evaluating the parent expression. Example:</p>
+<div class="highlight"><pre><span class="p">(</span><span class="o">/</span> <span class="p">(</span><span class="o">+</span> <span class="mi">2</span> <span class="mi">10</span><span class="p">)</span> <span class="mi">3</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">4</span>
+</pre></div>
+
+
+<p>The nesting of the expression completely defines the order of operations. This is nice because
+there is never any ambiguity.</p>
+<h3>Special Forms</h3>
+<p>Now here is where the magic happens. Remember how I said Lisp only has a handful of primitives?
+Here are ALL the primitives required for a fully functioning Lisp. </p>
+<div class="highlight"><pre><span class="n">eq</span><span class="o">?</span>
+<span class="n">quote</span>
+<span class="n">cons</span>
+<span class="n">car</span>
+<span class="n">cdr</span>
+<span class="n">atom</span><span class="o">?</span>
+<span class="n">define</span>
+<span class="n">lambda</span>
+<span class="n">cond</span>
+</pre></div>
+
+
+<p>Let's go through each in turn. Pay attention because some of these forms <em>do</em> <em>not</em>
+follow the normal evaluation order we learned above. </p>
+<p><strong>eq?</strong> just tests for equality. It returns True if the two arguments
+are the same, otherwise false.</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">eq</span><span class="o">?</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="n">True</span>
+<span class="p">(</span><span class="n">eq</span><span class="o">?</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="n">False</span>
+</pre></div>
+
+
+<p><strong>quote</strong> is the first special form we will encounter. Quote says to Lisp, "don't evaluate what I'm 
+about to pass in, just give me back the symbols exactly as I typed them".</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">quote</span> <span class="n">a</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="err">&#39;</span><span class="n">a</span>
+<span class="p">(</span><span class="n">quote</span> <span class="err">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="err">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The little ', is Lisp's way of saying that everything that follows is a symbol.</p>
+<p><strong>cons</strong>, <strong>car</strong> and <strong>cdr</strong> go together. Cons is like a piece of velcro, it sticks two things together.
+Car let's you get back the first piece and cdr lets you get the second piece.</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">define</span> <span class="n">box</span> <span class="p">(</span><span class="n">cons</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))</span>
+<span class="p">(</span><span class="n">car</span> <span class="n">box</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="n">cdr</span> <span class="n">box</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">4</span>
+</pre></div>
+
+
+<p>Lists are just boxes within boxes, like russian dolls. When you take the car of a list,
+you get back the first item. When you take the cdr, you get a list with the rest of the elements.
+When you keep opening them, eventually you get left with an empty box.</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">define</span> <span class="n">some</span><span class="o">-</span><span class="n">list</span> <span class="err">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>
+<span class="p">(</span><span class="n">car</span> <span class="n">some</span><span class="o">-</span><span class="n">list</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="n">cdr</span> <span class="n">some</span><span class="o">-</span><span class="n">list</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="err">&#39;</span><span class="p">(</span><span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="n">cdr</span> <span class="p">(</span><span class="n">cdr</span> <span class="p">(</span><span class="n">cdr</span> <span class="n">some</span><span class="o">-</span><span class="n">list</span><span class="p">)))</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="err">&#39;</span><span class="p">()</span> <span class="n">which</span> <span class="n">is</span> <span class="n">our</span> <span class="n">empty</span> <span class="n">list</span><span class="p">,</span> <span class="n">sometimes</span> <span class="n">called</span> <span class="n">nil</span>
+</pre></div>
+
+
+<p><strong>atom?</strong> will tell you whether or not the argument is an atom.</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">atom</span><span class="o">?</span> <span class="mi">3</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="n">True</span>
+<span class="p">(</span><span class="n">atom</span><span class="o">?</span> <span class="err">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="n">False</span>
+</pre></div>
+
+
+<p><strong>define</strong> binds values to symbols.</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">define</span> <span class="n">a</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">a</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">5</span>
+<span class="p">(</span><span class="n">define</span> <span class="n">b</span> <span class="p">(</span><span class="o">+</span> <span class="n">a</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">b</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">6</span>
+<span class="p">(</span><span class="o">+</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">11</span>
+</pre></div>
+
+
+<p><strong>lambda</strong> creates a function. It takes in a list of parameters and a body 
+and spits out a function that takes in the parameters and executes the body
+with the parameters substituted with the passed in values.</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">define</span> <span class="n">square</span> <span class="p">(</span><span class="n">lambda</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span> <span class="n">x</span> <span class="n">x</span><span class="p">)))</span>
+<span class="p">(</span><span class="n">square</span> <span class="mi">5</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="mi">25</span>
+<span class="p">(</span><span class="n">define</span> <span class="n">divides_evenly</span><span class="o">?</span> 
+    <span class="p">(</span><span class="n">lambda</span> <span class="p">(</span><span class="n">x</span> <span class="n">y</span><span class="p">)</span> 
+        <span class="p">(</span><span class="n">eq</span><span class="o">?</span> <span class="p">(</span><span class="o">*</span> <span class="n">x</span> 
+             <span class="p">(</span><span class="o">/</span> <span class="n">x</span> <span class="n">y</span><span class="p">))</span> 
+        <span class="n">y</span><span class="p">)))</span>
+<span class="p">(</span><span class="n">divides_evenly</span><span class="o">?</span> <span class="mi">5</span> <span class="mi">2</span><span class="p">)</span> <span class="err">#</span><span class="o">=&gt;</span> <span class="n">False</span>
+</pre></div>
+
+
+<p>Finally we have <strong>cond</strong>, the generalized if statement. It is just a bunch of
+if/else blocks that executes the first matching condition and returns
+the associated value. Here is the example:</p>
+<div class="highlight"><pre><span class="p">(</span><span class="n">define</span> <span class="n">a</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="n">cond</span>  <span class="p">((</span><span class="n">eq</span><span class="o">?</span> <span class="n">a</span> <span class="mi">1</span><span class="p">)</span> <span class="err">&#39;</span><span class="n">one</span><span class="p">)</span>
+       <span class="p">((</span><span class="n">eq</span><span class="o">?</span> <span class="n">a</span> <span class="mi">2</span><span class="p">)</span> <span class="err">&#39;</span><span class="n">two</span><span class="p">)</span>
+       <span class="p">((</span><span class="n">eq</span><span class="o">?</span> <span class="n">a</span> <span class="mi">3</span><span class="p">)</span> <span class="err">&#39;</span><span class="n">three</span><span class="p">)</span>
+       <span class="p">(</span><span class="k">else</span> <span class="err">&#39;</span><span class="n">no</span><span class="o">-</span><span class="n">idea</span><span class="p">))</span> <span class="err">#</span> <span class="o">=&gt;</span> <span class="err">&#39;</span><span class="n">three</span>
+</pre></div>
+
+
+<h2>Your Task</h2>
+<p>Write a small Lisp interpreter that supports all the functionality described above.</p>
+<h2>Code References</h2>
+<ul>
+<li><a href="http://norvig.com/lispy.html">Lispy</a> - Peter Norvig</li>
+<li><a href="https://github.com/readevalprintlove/lithp">Lithp</a> - Michael Fogus</li>
+</ul>
+<h2>Background Readings</h2>
+<ul>
+<li><a href="http://steve-yegge.blogspot.ca/2007/06/rich-programmer-food.html">Rich Programmer Food</a> - Steve Yegge</li>
+<li><a href="http://www.paulgraham.com/avg.html">Beating The Averages</a> - Paul Graham</li>
+<li><a href="http://www.dreamsongs.com/ArtOfLisp.html">The Art of Lisp and Writing</a> - Richard Gabriel</li>
+</ul>
+
+    <!-- Begin MailChimp Signup Form --> 
+    <div id="mc_embed_signup">
+    <form action="http://ldinh.us7.list-manage1.com/subscribe/post?u=8ca0c45c82ef713b79a588f83&amp;id=4de59dd00f" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+        <h3>Subscribe to Python Practice Projects</h3>
+        Don't want to miss out on project kit releases? Enter your email below to join our growing list of Python Practitioners.
+        <div class="mc-field-group">
+            <label for="mce-EMAIL">Email Address</label>
+            <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
+        </div>
+        <div id="mce-responses" class="clear">
+            <div class="response" id="mce-error-response" style="display:none"></div>
+            <div class="response" id="mce-success-response" style="display:none"></div>
+        </div>  <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+    </form>
+    </div>
+    <!--End mc_embed_signup-->
+
+</section>
+        </div>
+        
+        
+    </div>     </div> </div>
+
+<!--footer-->
+<div class="container">
+  <div class="well" style="background-color: #E9EFF6">
+    <div id="blog-footer">
+      <div class="row-fluid">
+	<div class="social span2" align="center" id="socialist">
+	  <ul class="nav nav-list">
+	    <li class="nav-header">
+	      Social
+	    </li>
+	    <li><a href="http://twitter.com/louiedinh"><i class="icon-twitter" style="color: #1f334b"></i>twitter</a></li>
+	    <li><a href="http://www.linkedin.com/profile/view?id=103017614"><i class="icon-linkedin" style="color: #1f334b"></i>linkedin</a></li>
+
+	  </ul>
+	</div>
+        <div class="links span2" align="center">
+          <ul class="nav nav-list">
+            <li class="nav-header"> 
+              Links
+            </li>
+            
+            <li><a href="http://jessenoller.com/good-to-great-python-reads/">Good to Great</a></li>
+            <li><a href="http://gnosis.cx/publish/tech_index_cp.html">Charming Python</a></li>
+            <li><a href="http://www.python.org/dev/peps/pep-0008/">PEP8</a></li>
+            <li><a href="http://docs.python-guide.org/en/latest/">Hitchhiker's Guide</a></li>
+            <li><a href="http://www.pythonweekly.com/">Python Weekly</a></li>
+          </ul>
+        </div>
+	<div class="site-nav span2" align="center">
+          <ul class="nav nav-list" id="site-links">
+            <li class="nav-header"> 
+              Site
+            </li>
+            <li><a href="http://pythonpracticeprojects.com"><i class="icon-home" style="color: #1f334b">
+                </i>Home</a></li>
+            <li><a href="http://pythonpracticeprojects.com/archives.html"><i class="icon-list" style="color: #1f334b">
+                </i>Archives</a></li>
+	    <li><a href="http://pythonpracticeprojects.com/tags.html"><i class="icon-tags" style="color: #1f334b">
+                </i>Tags</a></li>
+	    
+	  </ul>
+
+        </div>
+
+      </div> <!--end of fluid row-->
+    </div> <!--end of blog-footer-->
+    <hr />
+    <p align="center"><a href="http://pythonpracticeprojects.com">Python Practice Projects</a>
+      &copy; Louie Dinh
+    Powered by <a href="github.com/getpelican/pelican">Pelican</a> and
+        <a href="https://twitter.github.com/bootstrap">Twitter Bootstrap</a>. 
+        Icons by <a href="http://fortawesome.github.com/Font-Awesome">Font Awesome</a> and 
+        <a href="http://gregoryloucas.github.com/Font-Awesome-More">Font Awesome More</a></p>
+
+  </div> <!--end of well -->
+</div> <!--end of container -->
+
+<!--/footer-->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>
+
+
+<script>var _gaq=[['_setAccount','UA-39716444-2'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'))</script>
+
+</body>
+</html>
