@@ -8,24 +8,42 @@
 
 import re
 
-def to_list(s, result, curr_i):
-    '''
-    This function transforms a list in Lisp,
-    given as a string of characters, into
-    a nested list of strings in Python
-    '''
+# HELPER FUNCTIONS #
 
-    # (/ (+ (+ 1 1) 10) (- 4 1))
-    # ^
+# List Parser #
 
-    # result : [['/ ', ['+ ', ['+ 1 1'], ' 10'], ' ', ['- 4 1']]]
-    # 
+def is_list(e):
 
-    # curr_elem : ''
+    return e.startswith('(') and e.endswith(')')
+
+# REQUIRES: s is a syntactically valid list in Lisp
+def to_list(s):
+
+    i = 1
+
+    result = []
+
+    while i < len(s) - 1:
+
+        i, e = next_elem(s, i)
+
+        print(e) # dummy code
+
+        if is_list(e):
+
+            result.append(to_list(e))
+
+        elif e != '':
+
+            result.append(e)
+
+    return result
+
+def next_elem(s, start):
+
+    i = start
 
     curr_elem = ''
-
-    i = curr_i
 
     while i < len(s):
 
@@ -33,52 +51,51 @@ def to_list(s, result, curr_i):
 
         if ch == '(':
 
-            inner_elem = curr_elem.split()
+            #i, curr_elem = next_list(s, i)
+            return next_list(s, i)
 
-            if len(inner_elem) > 0:
-
-                result.append(inner_elem)
-                curr_elem = ''
-
-            nested = []
-
-            result.append(nested)
-            i += 1
-
-            (i, _) = to_list(s, nested, i)
-
-        elif ch == ')':
-
-            inner_list = curr_elem.split()
-
-            if len(inner_list) > 0:
-
-                result.append(inner_list)
-                curr_elem = ''
+        elif ch.isspace() or ch == ')':
 
             i += 1
-
-            return (i, result)
+            break
 
         else:
 
             curr_elem += ch
-            i += 1
 
-    return (i, result)
+        i += 1
 
-def get_list(s):
-    '''
-    Given a string representing a Lisp list,
-    this function returns a Python list
-    representation
-    '''
+    return (i, curr_elem)
 
-    result = []
+def next_list(s, start):
 
-    to_list(s, result, 0)
+    num_lparens = 0
 
-    return result[0]
+    curr_list = ''
+
+    i = start
+
+    while i < len(s):
+
+        curr_list += s[i]
+
+        if s[i] == '(':
+
+            num_lparens += 1
+
+        elif s[i] == ')':
+
+            num_lparens -= 1
+
+        if num_lparens == 0:
+
+            break
+
+        i += 1
+
+    return (i, curr_list)
+
+# Symbol Table #
 
 def get_value(sym):
     '''
