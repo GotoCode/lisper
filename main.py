@@ -277,6 +277,37 @@ def make_lambda(*args):
 
     return lambda x: Func(params, body).eval(x)
 
+def cond(*args):
+
+    if len(args) < 2:
+
+        raise RuntimeError("'cond' does not have minimum of two branches (inc. else clause)")
+
+    last_branch = args[-1]
+
+    if len(last_branch) != 2 or last_branch[0] != 'else':
+
+        raise RuntimeError("'cond' is non-exhaustive, please include a valid 'else' clause")
+
+    result = last_branch[1]
+
+    branches = args[:1]
+
+    for b in branches:
+
+        if len(b) != 2:
+
+            raise RuntimeError("'{}' is not a valid conditional branch".format(list_format(b)))
+
+        test = b[0]
+        ans  = b[1]
+
+        if evaluate(test):
+
+            return ans
+
+    return result
+
 # symbol table structure
 
 sym_table = {
@@ -292,12 +323,14 @@ sym_table = {
     'atom?' : atom,
     'define' : define,
     'lambda' : make_lambda,
+    'cond' : cond,
     }
 
 special_sym = {
     'quote',
     'define',
     'lambda',
+    'cond',
     }
 
 def get_value(sym):
