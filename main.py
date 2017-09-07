@@ -238,6 +238,26 @@ def atom(*args):
 
     return is_symbol or is_number
 
+def define(*args):
+
+    if len(args) != 2:
+
+        raise RuntimeError("'define' takes 2 arguments, {} given".format(len(args)))
+
+    is_symbol = re.match(r'\w+', str(args[0])) is not None
+
+    if not is_symbol:
+
+        raise RuntimeError("cannot bind '{}' to a value".format(args[0]))
+
+    if type(args[1]) is list:
+
+        sym_table[args[0]] = evaluate(args[1])
+
+    else:
+
+        sym_table[args[0]] = args[1]
+
 # symbol table structure
 
 sym_table = {
@@ -251,11 +271,12 @@ sym_table = {
     'car' : car,
     'cdr' : cdr,
     'atom?' : atom,
+    'define' : define,
     }
 
 special_sym = {
     'quote',
-    #'atom?',
+    'define',
     }
 
 def get_value(sym):
@@ -288,12 +309,20 @@ def evaluate(expr):
           Lisp normal form expressions
     '''
 
+    if type(expr) is int:
+
+        return expr
+
     sym = expr[0]
     val = get_value(sym)
 
     if val is None:
 
         return expr
+
+    if type(val) is list or type(val) is int:
+
+        return val
 
     if sym in special_sym:
 
@@ -311,7 +340,7 @@ def evaluate(expr):
 
         else:
 
-            args.append(curr_arg)
+            args.append(evaluate(curr_arg))
 
     return val(*args)
 
@@ -326,7 +355,9 @@ if __name__ == '__main__':
         expr = to_list(e) if is_list(e) else e.strip()
         
         result = evaluate(expr)
-        
-        print('==> {}'.format(lisp_format(result)))
+
+        if result is not None:
+            
+            print('==> {}'.format(lisp_format(result)))
 
         e = input('lisper > ')
