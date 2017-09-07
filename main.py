@@ -14,9 +14,10 @@ import re
 
 def lisp_format(x):
 
+    result = str(x)
+
     if type(x) is list:
 
-        result = str(x)
         result = result.replace("'", '')
         result = result.replace('"', '')
         result = result.replace(',', '')
@@ -170,13 +171,59 @@ def quote(*args):
     
         raise RuntimeError(msg.format(len(args)))
 
+    return args[0]
+
+def cons(*args):
+
+    if len(args) != 2:
+
+        msg = "'cons' takes 2 arguments, {} given"
+
+        raise RuntimeError(msg.format(len(args)))
+
+    first  = args[0]
+    second = args[1]
+
+    if type(first) is list or type(second) is not list:
+
+        raise RuntimeError("Invalid argument types for 'cons'")
+
+    result = [first]
+    result.extend(second)
+
+    return result
+
+def car(*args):
+
+    if len(args) != 1:
+
+        raise RuntimeError("'car' takes 1 argument, {} given".format(len(args)))
+
     arg = args[0]
 
-    if type(arg) is list:
+    if type(arg) is not list:
 
-        return "'" + lisp_format(args[0])
+        raise RuntimeError("Argument to 'car' is not a list")
 
-    return "'" + arg
+    if len(arg) == 0:
+
+        raise RuntimeError("'car' of empty list does not exist")
+
+    return arg[0]
+
+def cdr(*args):
+
+    if len(args) != 1:
+
+        raise RuntimeError("'cdr' takes 1 argument, {} given".format(len(args)))
+
+    arg = args[0]
+
+    if type(arg) is not list:
+
+        raise RuntimeError("Argument to 'cdr' is not a list")
+
+    return arg[1:]
 
 # symbol table structure
 
@@ -187,6 +234,9 @@ sym_table = {
     '/' : div,
     'eq?' : eq,
     'quote' : quote,
+    'cons' : cons,
+    'car' : car,
+    'cdr' : cdr,
     }
 
 special_sym = {
@@ -204,6 +254,10 @@ def get_value(sym):
 
         return sym_table[sym]
 
+    if re.match(r'\d+', str(sym)):
+
+        return None # symbol is not a function, but an integer constant
+
     raise RuntimeError("Symbol '{}' is undefined".format(sym))
 
 # Evaluation #
@@ -211,7 +265,7 @@ def get_value(sym):
 def evaluate(expr):
     '''
     Given a Lisp expression, represented as
-    a nested list of strings in Python, this
+    a nested list of values in Python, this
     function evaluates it and returns the final
     value
 
@@ -221,6 +275,10 @@ def evaluate(expr):
 
     sym = expr[0]
     val = get_value(sym)
+
+    if val is None:
+
+        return expr
 
     if sym in special_sym:
 
@@ -250,10 +308,10 @@ if __name__ == '__main__':
 
     while e != 'quit':
 
-        list_expr = to_list(e)
+        expr = to_list(e) if is_list(e) else e.strip()
         
-        result = evaluate(list_expr)
+        result = evaluate(expr)
         
-        print('==> {}'.format(result))
+        print('==> {}'.format(lisp_format(result)))
 
         e = input('lisper > ')
