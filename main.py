@@ -225,6 +225,19 @@ def cdr(*args):
 
     return arg[1:]
 
+def atom(*args):
+
+    if len(args) != 1:
+
+        raise RuntimeError("'atom?' takes 1 argument, {} given".format(len(args)))
+
+    arg = args[0]
+
+    is_symbol = re.match(r'\w+', str(arg)) is not None
+    is_number = re.match(r'\d+', str(arg)) is not None
+
+    return is_symbol or is_number
+
 # symbol table structure
 
 sym_table = {
@@ -237,10 +250,12 @@ sym_table = {
     'cons' : cons,
     'car' : car,
     'cdr' : cdr,
+    'atom?' : atom,
     }
 
 special_sym = {
     'quote',
+    #'atom?',
     }
 
 def get_value(sym):
