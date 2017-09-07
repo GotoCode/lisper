@@ -258,6 +258,25 @@ def define(*args):
 
         sym_table[args[0]] = args[1]
 
+def make_lambda(*args):
+
+    if len(args) != 2:
+
+        raise RuntimeError("'lambda' takes 2 arguments, {} given".format(len(args)))
+
+    params = args[0]
+    body   = args[1]
+
+    if type(params) is not list:
+
+        raise RuntimeError("'lambda' expects params in list format")
+
+    if type(body) is not list:
+
+        raise RuntimeError("'lambda' expects body in list format")
+
+    return lambda x: Func(params, body).eval(x)
+
 # symbol table structure
 
 sym_table = {
@@ -272,11 +291,13 @@ sym_table = {
     'cdr' : cdr,
     'atom?' : atom,
     'define' : define,
+    'lambda' : make_lambda,
     }
 
 special_sym = {
     'quote',
     'define',
+    'lambda',
     }
 
 def get_value(sym):
@@ -344,6 +365,67 @@ def evaluate(expr):
 
     return val(*args)
 
+# Lambda Functions #
+
+class Func:
+
+    def __init__(self, params, body):
+
+        self.params = params
+        self.body   = body
+        self.scope  = {}
+
+    def eval(self, *args):
+
+        if len(self.params) != len(args):
+
+            raise RuntimeError("function expects {} arguments, got {}".format(len(self.params), len(args)))
+
+        for i in range(len(self.params)):
+
+            p = self.params[i]
+            v = args[i]
+
+            self.scope[p] = v
+
+        return self.__evaluate_with_scope(self.body, self.scope)
+
+    def __evaluate_with_scope(self, expr, scope):
+
+        if type(expr) is int:
+
+            return expr
+
+        sym = expr[0]
+        val = scope.get(sym, None) or get_value(sym)
+
+        if val is None:
+
+            return expr
+
+        if type(val) is list or type(val) is int:
+
+            return val
+
+        if sym in special_sym:
+
+            return val(*expr[1:])
+        
+        args = []
+
+        for i in range(1, len(expr)):
+
+            curr_arg = expr[i]
+
+            if type(curr_arg) is list:
+
+                args.append(self.__evaluate_with_scope(curr_arg, scope))
+
+            else:
+
+                args.append(self.__evaluate_with_scope(curr_arg, scope))
+
+        return val(*args)
 
 # Testing Code #
 if __name__ == '__main__':
